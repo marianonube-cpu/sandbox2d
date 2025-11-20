@@ -63,6 +63,7 @@ const PROJECTILE_LIFESPAN = 60; // 1 segundo
 
 // --- Controles ---
 const keys = { left: false, right: false, up: false };
+const mouse = { x: 0, y: 0 };
 
 window.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
@@ -80,6 +81,11 @@ window.addEventListener('keyup', (e) => {
 });
 
 // --- Interacción con el Mouse ---
+canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+});
 
 
 canvas.addEventListener('mousedown', (e) => {
@@ -277,6 +283,21 @@ function draw() {
         ctx.arc(p.x, p.y, PROJECTILE_SIZE, 0, Math.PI * 2);
         ctx.fill();
     });
+
+    // Dibujar línea de apuntado en modo combate
+    if (player.currentMode === 'combat') {
+        const playerCenterX = player.x + player.width / 2;
+        const playerCenterY = player.y + player.height / 2;
+        const mouseWorldX = mouse.x + camera.x;
+        const mouseWorldY = mouse.y + camera.y;
+
+        ctx.beginPath();
+        ctx.moveTo(playerCenterX, playerCenterY);
+        ctx.lineTo(mouseWorldX, mouseWorldY);
+        ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
 
     ctx.restore();
 
