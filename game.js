@@ -103,67 +103,82 @@ function updateCamera() {
 
 // --- Bucle del Juego ---
 function update() {
-    // Movimiento del jugador
-    player.dx = 0;
-    if (keys.left) player.dx = -PLAYER_SPEED;
-    if (keys.right) player.dx = PLAYER_SPEED;
+    // --- Manejo de Controles ---
+    if (keys.left) {
+        player.dx = -PLAYER_SPEED;
+    } else if (keys.right) {
+        player.dx = PLAYER_SPEED;
+    } else {
+        player.dx = 0;
+    }
+
     if (keys.up && player.onGround) {
         player.dy = -JUMP_FORCE;
         player.onGround = false;
     }
 
+    // --- Aplicar Movimiento y Colisiones ---
+    
     // Aplicar gravedad
     player.dy += GRAVITY;
 
-    // Colisiones y movimiento
-    handleCollisions();
+    // Colisión en el eje Y (vertical)
+    player.y += player.dy;
+    handleCollision('y');
+
+    // Colisión en el eje X (horizontal)
+    player.x += player.dx;
+    handleCollision('x');
     
     // Actualizar cámara
     updateCamera();
 }
 
-function handleCollisions() {
-    player.onGround = false;
+function handleCollision(axis) {
+    const isX = axis === 'x';
+    const isY = axis === 'y';
 
-    // Colisión en X
-    player.x += player.dx;
-    let playerCol = Math.floor(player.x / TILE_SIZE);
-    let playerRow = Math.floor(player.y / TILE_SIZE);
-    
-    // Colisión en Y
-    player.y += player.dy;
-    playerCol = Math.floor(player.x / TILE_SIZE);
-    playerRow = Math.floor(player.y / TILE_SIZE);
+    // Puntos de colisión del jugador
+    const left = Math.floor(player.x / TILE_SIZE);
+    const right = Math.floor((player.x + player.width) / TILE_SIZE);
+    const top = Math.floor(player.y / TILE_SIZE);
+    const bottom = Math.floor((player.y + player.height) / TILE_SIZE);
 
-    // Iterar sobre los bloques cercanos al jugador
-    for (let y = -2; y <= 2; y++) {
-        for (let x = -2; x <= 2; x++) {
-            const tileX = playerCol + x;
-            const tileY = playerRow + y;
-
-            if (tileX >= 0 && tileX < WORLD_WIDTH && tileY >= 0 && tileY < WORLD_HEIGHT) {
-                const tile = world[tileY][tileX];
+    for (let y = top; y <= bottom; y++) {
+        for (let x = left; x <= right; x++) {
+            if (x >= 0 && x < WORLD_WIDTH && y >= 0 && y < WORLD_HEIGHT) {
+                const tile = world[y][x];
                 if (tile !== TILE_TYPES.AIR) {
                     const tileRect = {
-                        x: tileX * TILE_SIZE,
-                        y: tileY * TILE_SIZE,
+                        x: x * TILE_SIZE,
+                        y: y * TILE_SIZE,
                         width: TILE_SIZE,
                         height: TILE_SIZE,
                     };
-                    
-                    // Comprobar colisión
+
+                    // Si hay colisión
                     if (
                         player.x < tileRect.x + tileRect.width &&
                         player.x + player.width > tileRect.x &&
                         player.y < tileRect.y + tileRect.height &&
                         player.y + player.height > tileRect.y
                     ) {
-                        // Resolver colisión
-                        const overlapY = (player.y + player.height) - tileRect.y;
-                        if (player.dy > 0 && overlapY > 0 && overlapY < TILE_SIZE) {
-                             player.y = tileRect.y - player.height;
-                             player.dy = 0;
-                             player.onGround = true;
+                        if (isY) {
+                            if (player.dy > 0) { // Chocando desde arriba (cayendo)
+                                player.y = tileRect.y - player.height;
+                                player.dy = 0;
+                                player.onGround = true;
+                            } else if (player.dy < 0) { // Chocando desde abajo (saltando)
+                                player.y = tileRect.y + tileRect.height;
+                                player.dy = 0;
+                            }
+                        }
+                        if (isX) {
+                            if (player.dx > 0) { // Chocando por la izquierda
+                                player.x = tileRect.x - player.width;
+                            } else if (player.dx < 0) { // Chocando por la derecha
+                                player.x = tileRect.x + tileRect.height;
+                            }
                         }
                     }
                 }
