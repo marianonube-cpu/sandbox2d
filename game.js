@@ -68,15 +68,15 @@ window.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
     if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
     if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w') keys.up = true;
-    if (e.key === 'e') { // Tecla 'E' para cambiar de modo
-        player.currentMode = player.currentMode === 'combat' ? 'build' : 'combat';
-    }
 });
 
 window.addEventListener('keyup', (e) => {
     if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
     if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
     if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w') keys.up = false;
+    if (e.key === 'e') { // Tecla 'E' para cambiar de modo
+        player.currentMode = player.currentMode === 'combat' ? 'build' : 'combat';
+    }
 });
 
 // --- Interacción con el Mouse ---
