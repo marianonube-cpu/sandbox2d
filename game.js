@@ -68,6 +68,9 @@ window.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
     if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
     if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w') keys.up = true;
+    if (e.key === 'e') { // Tecla 'E' para cambiar de modo
+        player.currentMode = player.currentMode === 'combat' ? 'build' : 'combat';
+    }
 });
 
 window.addEventListener('keyup', (e) => {
@@ -77,10 +80,7 @@ window.addEventListener('keyup', (e) => {
 });
 
 // --- Interacción con el Mouse ---
-canvas.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    player.currentMode = player.currentMode === 'combat' ? 'build' : 'combat';
-});
+
 
 canvas.addEventListener('mousedown', (e) => {
     e.preventDefault();
@@ -284,7 +284,7 @@ function draw() {
     ctx.fillStyle = 'white';
     ctx.font = '20px Arial';
     ctx.textAlign = 'left';
-    const modeText = `Modo: ${player.currentMode === 'combat' ? 'Combate' : 'Construir'} (Rueda del ratón)`;
+    const modeText = `Modo: ${player.currentMode === 'combat' ? 'Combate' : 'Construir'} (Tecla 'E')`;
     ctx.fillText(modeText, 10, canvas.height - 10);
 }
 
