@@ -79,6 +79,63 @@ window.addEventListener('keyup', (e) => {
     if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w') keys.up = false;
 });
 
+// --- Interacción con el Mundo ---
+const PLAYER_REACH = 5 * TILE_SIZE; // 5 bloques de alcance
+
+function modifyTile(event, action) {
+    event.preventDefault();
+    
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    const worldX = mouseX + camera.x;
+    const worldY = mouseY + camera.y;
+
+    const tileX = Math.floor(worldX / TILE_SIZE);
+    const tileY = Math.floor(worldY / TILE_SIZE);
+
+    if (tileX < 0 || tileX >= WORLD_WIDTH || tileY < 0 || tileY >= WORLD_HEIGHT) {
+        return;
+    }
+
+    // Comprobar alcance del jugador
+    const playerCenterX = player.x + player.width / 2;
+    const playerCenterY = player.y + player.height / 2;
+    const distance = Math.sqrt(Math.pow(playerCenterX - worldX, 2) + Math.pow(playerCenterY - worldY, 2));
+
+    if (distance > PLAYER_REACH) {
+        return; // Fuera de alcance
+    }
+
+    if (action === 'break') {
+        if (world[tileY][tileX] !== TILE_TYPES.AIR) {
+            world[tileY][tileX] = TILE_TYPES.AIR;
+        }
+    } else if (action === 'place') {
+        if (world[tileY][tileX] === TILE_TYPES.AIR) {
+            // Evitar colocar bloques sobre el jugador
+            const playerRect = { x: player.x, y: player.y, width: player.width, height: player.height };
+            const tileRect = { x: tileX * TILE_SIZE, y: tileY * TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE };
+            if (playerRect.x < tileRect.x + tileRect.width && playerRect.x + playerRect.width > tileRect.x &&
+                playerRect.y < tileRect.y + tileRect.height && playerRect.y + playerRect.height > tileRect.y) {
+                return; // El jugador está en el camino
+            }
+            world[tileY][tileX] = TILE_TYPES.DIRT;
+        }
+    }
+}
+
+canvas.addEventListener('mousedown', (e) => {
+    if (e.button === 0) { // Clic izquierdo
+        modifyTile(e, 'break');
+    }
+});
+
+canvas.addEventListener('contextmenu', (e) => {
+    modifyTile(e, 'place'); // Clic derecho
+});
+
 // --- Cámara ---
 const camera = {
     x: 0,
