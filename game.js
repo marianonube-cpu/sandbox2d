@@ -177,7 +177,7 @@ function handleCollision(axis) {
                             if (player.dx > 0) { // Chocando por la izquierda
                                 player.x = tileRect.x - player.width;
                             } else if (player.dx < 0) { // Chocando por la derecha
-                                player.x = tileRect.x + tileRect.height;
+                                player.x = tileRect.x + tileRect.width;
                             }
                         }
                     }
